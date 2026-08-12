@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Sidebar } from './components/Sidebar';
 import { MainArea } from './components/MainArea';
 import { Automata, Transition, ConversionStep } from './types';
-import { auth, signInWithGoogle, logout } from './lib/firebase';
+import { auth, signInWithGoogle, logout, completeRedirectSignIn } from './lib/firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { convertNfaToDfa, convertRegexToEnfa, convertGrammarToFa, convertAutomataToRegex, convertLangToFa, convertLangIntersection, checkFaEquivalence } from './lib/automata';
 
@@ -44,11 +44,34 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+    completeRedirectSignIn()
+      .then((redirectUser) => {
+        if (!cancelled && redirectUser) {
+          setUser(redirectUser);
+        }
+      })
+      .catch((err: any) => {
+        if (cancelled) return;
+        console.error(err);
+        if (err?.code === 'auth/unauthorized-domain') {
+          setAuthError(
+            "This domain isn't authorized for sign-in yet. Add it under Firebase Console → Authentication → Settings → Authorized domains."
+          );
+        } else {
+          setAuthError(err?.message || 'An error occurred completing sign in.');
+        }
+      });
+
     const unsubscribe = onAuthStateChanged(auth, (u) => {
       setUser(u);
       setAuthLoading(false);
     });
-    return () => unsubscribe();
+
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
   }, []);
 
   const handleLogin = async () => {

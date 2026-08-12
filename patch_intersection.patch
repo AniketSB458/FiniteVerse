@@ -1,0 +1,97 @@
+--- src/lib/automata.ts
++++ src/lib/automata.ts
+@@ -475,34 +475,41 @@
+ 
+     const dfas = activeConds.map((c, i) => buildLangDFA(c.cond, c.str, alphabet, String.fromCharCode(65 + i), c.count || 1));
+ 
+     const startState = dfas.map(d => d.startState).join(',');
++    
++    const stateNameMap = new Map<string, string>();
++    let stateCounter = 0;
++    const getQName = (s: string) => {
++        if (!stateNameMap.has(s)) {
++            stateNameMap.set(s, `q${stateCounter++}`);
++        }
++        return stateNameMap.get(s)!;
++    };
++
+     const productStates = new Set([startState]);
+     const queue = [startState];
+     const productTransitions: {from: string[], symbol: string, to: string[]}[] = [];
+-    const dfaStates: string[][] = [[startState]];
++    const dfaStates: string[][] = [[getQName(startState)]];
+ 
+     steps.push({
+         type: 'init',
+         message: `Building Product Automaton (Intersection) for ${activeConds.length} languages...`,
+-        dfaStates: [[startState]],
++        dfaStates: [[getQName(startState)]],
+         dfaTransitions: [],
+-        highlightDfaState: [startState],
+-        dfaStartState: [startState],
++        highlightDfaState: [getQName(startState)],
++        dfaStartState: [getQName(startState)],
+         dfaAcceptStates: []
+     });
+ 
+     while (queue.length > 0) {
+         const curr = queue.shift()!;
+         const currStates = curr.split(',');
+ 
+         for (const sym of alphabet) {
+             const nextStates = currStates.map((q, i) => {
+                 const dfa = dfas[i];
+                 const t = dfa.transitions.find(t => t.from === q && t.symbol === sym);
+                 return t ? t.to : q; // Should always find a transition in DFA
+             });
+ 
+             const nextState = nextStates.join(',');
+-            productTransitions.push({ from: [curr], symbol: sym, to: [nextState] });
++            productTransitions.push({ from: [getQName(curr)], symbol: sym, to: [getQName(nextState)] });
+ 
+             if (!productStates.has(nextState)) {
+                 productStates.add(nextState);
+-                dfaStates.push([nextState]);
++                dfaStates.push([getQName(nextState)]);
+                 queue.push(nextState);
+                 
+                 const acceptStates = Array.from(productStates).filter(s => {
+                     const sStates = s.split(',');
+                     return dfas.every((dfa, i) => dfa.acceptStates.includes(sStates[i]));
+-                }).map(s => [s]);
++                }).map(s => [getQName(s)]);
+ 
+                 steps.push({
+                     type: 'process_state',
+-                    message: `Found product state {${nextState}} on symbol '${sym}'`,
++                    message: `Found product state ${getQName(nextState)} (from ${nextState}) on symbol '${sym}'`,
+                     dfaStates: [...dfaStates],
+                     dfaTransitions: [...productTransitions],
+-                    highlightDfaState: [nextState],
+-                    dfaStartState: [startState],
++                    highlightDfaState: [getQName(nextState)],
++                    dfaStartState: [getQName(startState)],
+                     dfaAcceptStates: acceptStates
+                 });
+             }
+         }
+     }
+     
+     const acceptStates = Array.from(productStates).filter(s => {
+         const sStates = s.split(',');
+         return dfas.every((dfa, i) => dfa.acceptStates.includes(sStates[i]));
+-    }).map(s => [s]);
++    }).map(s => [getQName(s)]);
+ 
+     steps.push({
+         type: 'done',
+         message: `Product Automaton generation complete.`,
+         dfaStates: [...dfaStates],
+         dfaTransitions: [...productTransitions],
+         highlightDfaState: [],
+-        dfaStartState: [startState],
++        dfaStartState: [getQName(startState)],
+         dfaAcceptStates: acceptStates
+     });
+ 
+     return steps;

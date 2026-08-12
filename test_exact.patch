@@ -1,0 +1,33 @@
+--- src/lib/automata.ts
++++ src/lib/automata.ts
+@@ -332,6 +332,32 @@
+         return { states, transitions, startState: `${prefix}0`, acceptStates };
+     }
+ 
++    if (condition === 'exact_count_1' || condition === 'exact_count_2') {
++        const targetChar = chars[0] || 'a';
++        const targetCount = condition === 'exact_count_1' ? 1 : 2;
++        const numStates = targetCount + 2;
++        
++        for (let i = 0; i < numStates; i++) {
++            states.push(`${prefix}${i}`);
++        }
++        
++        for (let i = 0; i < numStates; i++) {
++            for (const sym of alphabet) {
++                if (sym === targetChar) {
++                    if (i < numStates - 1) {
++                        transitions.push({ from: `${prefix}${i}`, symbol: sym, to: `${prefix}${i + 1}` });
++                    } else {
++                        transitions.push({ from: `${prefix}${i}`, symbol: sym, to: `${prefix}${i}` });
++                    }
++                } else {
++                    transitions.push({ from: `${prefix}${i}`, symbol: sym, to: `${prefix}${i}` });
++                }
++            }
++        }
++        acceptStates.push(`${prefix}${targetCount}`);
++        return { states, transitions, startState: `${prefix}0`, acceptStates };
++    }
++
+     if (condition === 'length_div_by') {

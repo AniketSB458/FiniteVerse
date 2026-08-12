@@ -1,0 +1,55 @@
+--- src/lib/automata.ts
++++ src/lib/automata.ts
+@@ -194,7 +194,7 @@
+     return steps;
+ }
+ 
+-export function convertLangToFa(condition: string, str: string): ConversionStep[] {
++export function convertLangToFa(condition: string, str: string, count: number = 1): ConversionStep[] {
+     const steps: ConversionStep[] = [];
+     const chars = str.split('').filter(c => c.trim() !== '');
+     if (chars.length === 0) chars.push('a');
+@@ -201,7 +201,7 @@
+         alphabet.push(alphabet[0] === 'a' ? 'b' : 'a');
+     }
+ 
+-    const dfa = buildLangDFA(condition, str, alphabet, 'q');
++    const dfa = buildLangDFA(condition, str, alphabet, 'q', count);
+ 
+     const dfaStates = dfa.states.map(s => [s]);
+     const dfaTransitions = dfa.transitions.map(t => ({ from: [t.from], symbol: t.symbol, to: [t.to] }));
+@@ -305,7 +305,7 @@
+ 
+ 
+-function buildLangDFA(condition: string, str: string, alphabet: string[], prefix: string) {
++function buildLangDFA(condition: string, str: string, alphabet: string[], prefix: string, count: number = 1) {
+     const chars = str.split('').filter(c => c.trim() !== '');
+     const m = chars.length;
+     if (m === 0 && condition !== 'length_div_by' && condition !== 'binary_div_by') chars.push('a');
+@@ -333,9 +333,8 @@
+         return { states, transitions, startState: `${prefix}0`, acceptStates };
+     }
+ 
+-    if (condition === 'exact_count_1' || condition === 'exact_count_2') {
++    if (condition === 'exact_count') {
+         const targetChar = chars[0] || 'a';
+-        const targetCount = condition === 'exact_count_1' ? 1 : 2;
+-        const numStates = targetCount + 2;
++        const targetCount = Math.max(0, count);
++        const numStates = targetCount + 2;
+         
+@@ -436,7 +435,7 @@
+ }
+ 
+-export function convertLangIntersection(conds: {cond: string, str: string}[]): ConversionStep[] {
++export function convertLangIntersection(conds: {cond: string, str: string, count?: number}[]): ConversionStep[] {
+     const steps: ConversionStep[] = [];
+     const activeConds = conds.filter(c => c.cond !== 'none');
+     if (activeConds.length === 0) activeConds.push({cond: 'starts_with', str: 'a'});
+@@ -448,7 +447,7 @@
+     if (alphabet.length === 0) alphabet = ['a', 'b'];
+ 
+-    const dfas = activeConds.map((c, i) => buildLangDFA(c.cond, c.str, alphabet, String.fromCharCode(65 + i)));
++    const dfas = activeConds.map((c, i) => buildLangDFA(c.cond, c.str, alphabet, String.fromCharCode(65 + i), c.count || 1));
+ 
+     const startState = dfas.map(d => d.startState).join(',');

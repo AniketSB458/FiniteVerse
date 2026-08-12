@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-tertiary: var(--bg-tertiary);
+  --color-border-subtle: var(--border-subtle);
+  --color-text-main: var(--text-main);
+  --color-text-muted: var(--text-muted);
+  --color-accent-main: var(--accent-main);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-light: var(--accent-light);
+  --color-accent-alt: var(--accent-alt);
+  --color-node-bg: var(--node-bg);
+  --color-edge-base: var(--edge-base);
+  --color-edge-active: var(--edge-active);
+}
+
+:root, .theme-dark {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #111827;
+  --border-subtle: #334155;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --accent-main: #3b82f6;
+  --accent-hover: #2563eb;
+  --accent-light: #60a5fa;
+  --accent-alt: #10b981;
+  --node-bg: #1e293b;
+  --edge-base: #64748b;
+  --edge-active: #3b82f6;
+}
+
+.theme-bw {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f1f5f9;
+  --border-subtle: #cbd5e1;
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --accent-main: #000000;
+  --accent-hover: #333333;
+  --accent-light: #475569;
+  --accent-alt: #000000;
+  --node-bg: #ffffff;
+  --edge-base: #94a3b8;
+  --edge-active: #000000;
+}
+
+.theme-gp {
+  /* Golden Pink / Instagram-like */
+  --bg-primary: #fff0f5; 
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #fce7f3; 
+  --border-subtle: #fbcfe8; 
+  --text-main: #831843; 
+  --text-muted: #be185d; 
+  --accent-main: #ec4899; 
+  --accent-hover: #db2777; 
+  --accent-light: #f472b6; 
+  --accent-alt: #d97706; 
+  --node-bg: #ffffff;
+  --edge-base: #f9a8d4; 
+  --edge-active: #d97706; 
+}

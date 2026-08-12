@@ -1,0 +1,19 @@
+--- src/lib/automata.ts
++++ src/lib/automata.ts
+@@ -472,6 +472,8 @@
+     });
+     let alphabet = Array.from(new Set(allChars));
+-    if (alphabet.length === 0) alphabet = ['a',    const dfas = activeConds.map((c, i) => buildLangDFA(c.cond, c.str, alphabet, String.fromCharCode(65 + i), c.count || 1));
++    if (alphabet.length === 0) alphabet = ['a', 'b'];
++
++    const dfas = activeConds.map((c, i) => buildLangDFA(c.cond, c.str, alphabet, String.fromCharCode(65 + i), c.count || 1));
+ 
+     const stateMap = new Map<string, string>();
+@@ -543,6 +545,6 @@
+     const acceptStates = Array.from(productStates).filter(s => {
+         const sStates = s.split(',');
+         return dfas.every((dfa, i) => dfa.acceptStates.includes(sStates[i]));
+-    }).map(s => [getStateName(s)]);=> [s]);
++    }).map(s => [getStateName(s)]);
+ 
+     steps.push({

@@ -1,0 +1,6 @@
+{
+  "name": "FiniteVerse",
+  "description": "Visualizer and converter for finite automata (NFA to DFA) with step-by-step animations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut } from "firebase/auth";
 import { getFirestore, doc, setDoc, serverTimestamp } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -13,16 +13,25 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-export const db = getFirestore(app, import.meta.env.VITE_FIREBASE_DATABASE_ID);
+export const db = import.meta.env.VITE_FIREBASE_DATABASE_ID 
+  ? getFirestore(app, import.meta.env.VITE_FIREBASE_DATABASE_ID) 
+  : getFirestore(app);
 
 export const signInWithGoogle = async () => {
   const provider = new GoogleAuthProvider();
   try {
-    const result = await signInWithPopup(auth, provider);
-    const user = result.user;
-    
-    // Save user info to Firestore
-    if (user) {
+    await signInWithRedirect(auth, provider);
+  } catch (error) {
+    console.error("Error signing in with Google", error);
+  }
+};
+
+export const handleAuthRedirect = async () => {
+  try {
+    const result = await getRedirectResult(auth);
+    if (result?.user) {
+      const user = result.user;
+      // Save user info to Firestore
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
         email: user.email,
@@ -32,7 +41,7 @@ export const signInWithGoogle = async () => {
       }, { merge: true });
     }
   } catch (error) {
-    console.error("Error signing in with Google", error);
+    console.error("Error handling auth redirect", error);
   }
 };
 

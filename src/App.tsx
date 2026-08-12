@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Sidebar } from './components/Sidebar';
 import { MainArea } from './components/MainArea';
 import { Automata, Transition, ConversionStep } from './types';
-import { auth, signInWithGoogle, logout } from './lib/firebase';
+import { auth, signInWithGoogle, logout, handleAuthRedirect } from './lib/firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { convertNfaToDfa, convertRegexToEnfa, convertGrammarToFa, convertAutomataToRegex, convertLangToFa, convertLangIntersection, checkFaEquivalence } from './lib/automata';
 
@@ -43,6 +43,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    handleAuthRedirect();
     const unsubscribe = onAuthStateChanged(auth, (u) => {
       setUser(u);
       setAuthLoading(false);

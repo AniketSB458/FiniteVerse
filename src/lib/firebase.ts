@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
 import { getFirestore, doc, setDoc, serverTimestamp } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -20,28 +20,26 @@ export const db = import.meta.env.VITE_FIREBASE_DATABASE_ID
 export const signInWithGoogle = async () => {
   const provider = new GoogleAuthProvider();
   try {
-    await signInWithRedirect(auth, provider);
-  } catch (error) {
-    console.error("Error signing in with Google", error);
-  }
-};
-
-export const handleAuthRedirect = async () => {
-  try {
-    const result = await getRedirectResult(auth);
-    if (result?.user) {
-      const user = result.user;
-      // Save user info to Firestore
-      await setDoc(doc(db, "users", user.uid), {
-        uid: user.uid,
-        email: user.email,
-        displayName: user.displayName,
-        photoURL: user.photoURL,
-        lastSignInTime: serverTimestamp()
-      }, { merge: true });
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+    // Save user info to Firestore
+    if (user) {
+      try {
+        await setDoc(doc(db, "users", user.uid), {
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          photoURL: user.photoURL,
+          lastSignInTime: serverTimestamp()
+        }, { merge: true });
+      } catch (firestoreError) {
+        console.error("Firestore error (ignoring for login):", firestoreError);
+      }
     }
-  } catch (error) {
-    console.error("Error handling auth redirect", error);
+    return user;
+  } catch (error: any) {
+    console.error("Error signing in with Google:", error);
+    throw error;
   }
 };
 

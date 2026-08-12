@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Activity, Palette, Play, SquareTerminal, Github, Linkedin, X, Mail, LogOut } from 'lucide-react';
+import { Activity, Palette, Play, SquareTerminal, Github, Linkedin, X, Mail, LogOut, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Sidebar } from './components/Sidebar';
 import { MainArea } from './components/MainArea';
 import { Automata, Transition, ConversionStep } from './types';
-import { auth, signInWithGoogle, logout, handleAuthRedirect } from './lib/firebase';
+import { auth, signInWithGoogle, logout } from './lib/firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { convertNfaToDfa, convertRegexToEnfa, convertGrammarToFa, convertAutomataToRegex, convertLangToFa, convertLangIntersection, checkFaEquivalence } from './lib/automata';
 
@@ -28,6 +28,7 @@ export default function App() {
   const [showAboutModal, setShowAboutModal] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [authError, setAuthError] = useState<string | null>(null);
   const [showSplash, setShowSplash] = useState(true);
   
   const [simulationSteps, setSimulationSteps] = useState<ConversionStep[]>([]);
@@ -43,13 +44,28 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    handleAuthRedirect();
     const unsubscribe = onAuthStateChanged(auth, (u) => {
       setUser(u);
       setAuthLoading(false);
     });
     return () => unsubscribe();
   }, []);
+
+  const handleLogin = async () => {
+    setAuthError(null);
+    try {
+      await signInWithGoogle();
+    } catch (err: any) {
+      console.error(err);
+      if (err?.message?.includes("Cross-Origin-Opener-Policy") || err?.message?.includes("closed")) {
+        setAuthError("Popup was blocked by your browser's strict privacy rules. Please try turning off Shields/Tracking Prevention or use standard Chrome.");
+      } else if (err?.message?.includes("Database is closing")) {
+        setAuthError("Database blocked. Are you in an Incognito window? Please use a normal window to log in.");
+      } else {
+        setAuthError(err.message || "An error occurred during sign in.");
+      }
+    }
+  };
 
   useEffect(() => {
     document.documentElement.className = theme;
@@ -169,11 +185,18 @@ export default function App() {
           <h1 className="text-2xl font-bold mb-2">Welcome to FiniteVerse</h1>
           <p className="text-text-muted mb-8">Please sign in to access the automata simulator workspace.</p>
           <button
-            onClick={signInWithGoogle}
+            onClick={handleLogin}
             className="w-full py-3 bg-accent-main text-white hover:bg-accent-hover rounded-md font-medium transition-colors flex items-center justify-center gap-2"
           >
             Sign In with Google
           </button>
+          
+          {authError && (
+            <div className="mt-6 p-4 bg-red-500/10 border border-red-500/20 rounded-md text-red-500 text-sm flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+              <p className="text-left leading-relaxed">{authError}</p>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -239,7 +262,7 @@ export default function App() {
             </button>
           ) : (
             <button 
-              onClick={signInWithGoogle}
+              onClick={handleLogin}
               className="px-4 py-2 bg-accent-main text-white hover:bg-accent-hover rounded-md text-sm font-medium transition-colors"
             >
               Sign In

@@ -281,7 +281,7 @@ export default function App() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-bg-primary border border-border-subtle rounded-xl p-6 max-w-lg w-full shadow-2xl relative"
+              className="bg-bg-primary border border-border-subtle rounded-xl p-6 max-w-2xl w-full shadow-2xl relative"
             >
               <button 
                 onClick={() => setShowAboutModal(false)}
@@ -299,7 +299,7 @@ export default function App() {
                   FiniteVerse is an interactive computational theory learning platform developed by team 458TM.
                 </p>
                 
-                <div className="grid grid-cols-1 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {/* Profile 1 */}
                   <div className="bg-bg-secondary border border-border-subtle rounded-lg p-4 flex flex-col gap-3">
                     <div>
@@ -314,6 +314,44 @@ export default function App() {
                         <Linkedin className="w-4 h-4" />
                       </a>
                       <a href="mailto:anyabandgar458@gmail.com" className="p-2 bg-bg-tertiary rounded-md hover:text-accent-main text-text-muted border border-transparent hover:border-accent-main/30 transition-colors">
+                        <Mail className="w-4 h-4" />
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* Profile 2 */}
+                  <div className="bg-bg-secondary border border-border-subtle rounded-lg p-4 flex flex-col gap-3">
+                    <div>
+                      <h3 className="font-bold text-base">Ayush J.Mahadik</h3>
+                      <p className="text-[10px] text-text-muted uppercase tracking-widest mt-1">Developer</p>
+                    </div>
+                    <div className="flex items-center gap-2 mt-auto pt-3 border-t border-border-subtle">
+                      <a href="#" target="_blank" rel="noopener noreferrer" className="p-2 bg-bg-tertiary rounded-md hover:text-text-main text-text-muted border border-transparent hover:border-border-subtle transition-colors">
+                        <Github className="w-4 h-4" />
+                      </a>
+                      <a href="https://www.linkedin.com/in/ayush-mahadik-b49b28399?utm_source=share_via&utm_content=profile&utm_medium=member_android" target="_blank" rel="noopener noreferrer" className="p-2 bg-bg-tertiary rounded-md hover:text-[#0a66c2] text-text-muted border border-transparent hover:border-[#0a66c2]/30 transition-colors">
+                        <Linkedin className="w-4 h-4" />
+                      </a>
+                      <a href="mailto:ayushmahadik1256@gmail.com" className="p-2 bg-bg-tertiary rounded-md hover:text-accent-main text-text-muted border border-transparent hover:border-accent-main/30 transition-colors">
+                        <Mail className="w-4 h-4" />
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* Profile 3 */}
+                  <div className="bg-bg-secondary border border-border-subtle rounded-lg p-4 flex flex-col gap-3">
+                    <div>
+                      <h3 className="font-bold text-base">Salman R.Bagwan</h3>
+                      <p className="text-[10px] text-text-muted uppercase tracking-widest mt-1">Developer</p>
+                    </div>
+                    <div className="flex items-center gap-2 mt-auto pt-3 border-t border-border-subtle">
+                      <a href="https://github.com/triquetrus" target="_blank" rel="noopener noreferrer" className="p-2 bg-bg-tertiary rounded-md hover:text-text-main text-text-muted border border-transparent hover:border-border-subtle transition-colors">
+                        <Github className="w-4 h-4" />
+                      </a>
+                      <a href="https://www.linkedin.com/in/salman-bagwan-885731387?utm_source=share_via&utm_content=profile&utm_medium=member_android" target="_blank" rel="noopener noreferrer" className="p-2 bg-bg-tertiary rounded-md hover:text-[#0a66c2] text-text-muted border border-transparent hover:border-[#0a66c2]/30 transition-colors">
+                        <Linkedin className="w-4 h-4" />
+                      </a>
+                      <a href="mailto:salmanbagwan6002@gmail.com" className="p-2 bg-bg-tertiary rounded-md hover:text-accent-main text-text-muted border border-transparent hover:border-accent-main/30 transition-colors">
                         <Mail className="w-4 h-4" />
                       </a>
                     </div>

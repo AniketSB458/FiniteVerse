@@ -7,6 +7,8 @@ import {
   getRedirectResult,
   setPersistence,
   browserLocalPersistence,
+  browserSessionPersistence,
+  inMemoryPersistence,
   signOut,
   User,
 } from "firebase/auth";
@@ -28,7 +30,13 @@ export const db = import.meta.env.VITE_FIREBASE_DATABASE_ID
   : getFirestore(app);
 
 setPersistence(auth, browserLocalPersistence).catch((err) => {
-  console.error("Failed to set auth persistence:", err);
+  console.warn("Failed to set auth persistence, falling back to session:", err);
+  setPersistence(auth, browserSessionPersistence).catch((err2) => {
+    console.warn("Session persistence failed, falling back to in-memory:", err2);
+    setPersistence(auth, inMemoryPersistence).catch((err3) => {
+      console.error("All persistence setups failed:", err3);
+    });
+  });
 });
 
 const provider = new GoogleAuthProvider();
@@ -60,30 +68,11 @@ const saveUserToFirestore = async (user: User) => {
 };
 
 export const signInWithGoogle = async () => {
-  if (isEmbeddedInIframe()) {
-    await signInWithRedirect(auth, provider);
-    return null;
-  }
-
   try {
     const result = await signInWithPopup(auth, provider);
     if (result.user) await saveUserToFirestore(result.user);
     return result.user;
   } catch (error: any) {
-    const code = error?.code || "";
-    const message = error?.message || "";
-    const shouldFallbackToRedirect =
-      code === "auth/popup-blocked" ||
-      code === "auth/popup-closed-by-user" ||
-      code === "auth/cancelled-popup-request" ||
-      message.includes("Cross-Origin-Opener-Policy") ||
-      message.includes("closed");
-
-    if (shouldFallbackToRedirect) {
-      await signInWithRedirect(auth, provider);
-      return null;
-    }
-
     console.error("Error signing in with Google:", error);
     throw error;
   }

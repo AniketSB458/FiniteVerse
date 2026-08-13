@@ -29,6 +29,8 @@ type SidebarProps = {
   setIntersectionConditions: (v: {cond: string, str: string, count?: number}[]) => void;
   langOutputType?: 'DFA' | 'NFA';
   setLangOutputType?: (v: 'DFA' | 'NFA') => void;
+  plState?: any;
+  setPlState?: (st: any) => void;
   theme?: string;
   setTheme?: (v: string) => void;
 };
@@ -47,6 +49,7 @@ export function Sidebar({
   langCount, setLangCount,
   intersectionConditions, setIntersectionConditions,
   langOutputType = 'DFA', setLangOutputType,
+  plState, setPlState,
   theme, setTheme
 }: SidebarProps) {
 
@@ -78,7 +81,8 @@ export function Sidebar({
   const isRegexSource = transformation === 'REGEX_TO_ENFA' || transformation === 'REGEX_TO_DFA';
   const isGrammarSource = transformation === 'RG_TO_FA' || transformation === 'CFG_TO_PDA';
   const isLangSource = transformation === 'LANG_INTERSECTION';
-  const isAutomatonSource = (!isRegexSource && !isGrammarSource && !isLangSource) || transformation === 'FA_EQUIVALENCE';
+  const isPumpingLemma = transformation === 'PUMPING_LEMMA';
+  const isAutomatonSource = ((!isRegexSource && !isGrammarSource && !isLangSource && !isPumpingLemma) || transformation === 'FA_EQUIVALENCE');
   const showRegexInput = isRegexSource || transformation === 'FA_EQUIVALENCE';
 
   return (
@@ -94,6 +98,8 @@ export function Sidebar({
           <option value="NONE">None (Visualization Only)</option>
                     <option value="LANG_INTERSECTION">Language Intersection (Product FA)</option>
           <option value="NFA_TO_DFA">NFA → DFA</option>
+          <option value="DFA_MINIMIZATION">DFA Minimization</option>
+          <option value="PUMPING_LEMMA">Pumping Lemma Analysis</option>
           <option value="ENFA_TO_NFA">ε-NFA → NFA</option>
           <option value="ENFA_TO_DFA">ε-NFA → DFA</option>
           <option value="DFA_TO_NFA">DFA → NFA</option>
@@ -308,6 +314,105 @@ export function Sidebar({
               </div>
             )}
           </motion.section>
+        )}
+
+        
+        {isPumpingLemma && (
+          <motion.div
+            key="pl-input"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="flex flex-col gap-6"
+          >
+            <section>
+              <label className="text-xs font-bold uppercase tracking-widest text-text-muted block mb-3">Target Language</label>
+              <select 
+                value={plState.language} 
+                onChange={e => setPlState({...plState, language: e.target.value})}
+                disabled={isSimulating}
+                className="w-full bg-bg-secondary border border-border-subtle rounded p-2 text-sm text-text-main outline-none focus:border-accent-main"
+              >
+                <option value="anbn">L = aⁿbⁿ</option>
+                <option value="0n1n">L = 0ⁿ1ⁿ</option>
+                <option value="anbncn">L = aⁿbⁿcⁿ</option>
+                <option value="0n1n2n">L = 0ⁿ1ⁿ2ⁿ</option>
+                <option value="0n1n0n">L = 0ⁿ1ⁿ0ⁿ</option>
+                <option value="wwR">L = wwᴿ (Palindromes over a,b)</option>
+                <option value="wwR_01">L = wwᴿ (Palindromes over 0,1)</option>
+                <option value="ww">L = ww (Copy language)</option>
+                <option value="prime">L = aᵖ (p is prime)</option>
+                <option value="prime_0">L = 0ᵖ (p is prime)</option>
+                <option value="anbm_neq">L = aⁿbᵐ (n ≠ m)</option>
+                <option value="eq_01">L = {'{w | #0(w) = #1(w)}'}</option>
+              </select>
+            </section>
+
+            <section>
+              <label className="text-xs font-bold uppercase tracking-widest text-text-muted block mb-3">Pumping Length (p)</label>
+              <input 
+                type="number"
+                min="0"
+                value={plState.p}
+                onChange={e => setPlState({...plState, p: e.target.value === '' ? '' : (parseInt(e.target.value) ?? 0)})}
+                disabled={isSimulating}
+                className="w-full bg-bg-secondary border border-border-subtle rounded p-2 text-sm text-text-main outline-none focus:border-accent-main font-mono"
+              />
+            </section>
+
+            <section>
+              <label className="text-xs font-bold uppercase tracking-widest text-text-muted block mb-3">String (w ∈ L, |w| ≥ p)</label>
+              <input 
+                type="text"
+                value={plState.w}
+                onChange={e => setPlState({...plState, w: e.target.value})}
+                disabled={isSimulating}
+                className="w-full bg-bg-secondary border border-border-subtle rounded p-2 text-sm text-text-main outline-none focus:border-accent-main font-mono"
+              />
+            </section>
+
+            <section>
+              <label className="text-xs font-bold uppercase tracking-widest text-text-muted block mb-3">Partition (w = xyz)</label>
+              <div className="flex flex-col gap-2">
+                <input 
+                  type="text"
+                  placeholder="x"
+                  value={plState.x}
+                  onChange={e => setPlState({...plState, x: e.target.value})}
+                  disabled={isSimulating}
+                  className="w-full bg-bg-secondary border border-border-subtle rounded p-2 text-sm text-text-main outline-none focus:border-accent-main font-mono"
+                />
+                <input 
+                  type="text"
+                  placeholder="y (|y| > 0, |xy| ≤ p)"
+                  value={plState.y}
+                  onChange={e => setPlState({...plState, y: e.target.value})}
+                  disabled={isSimulating}
+                  className="w-full bg-bg-secondary border border-border-subtle rounded p-2 text-sm text-text-main outline-none focus:border-accent-main font-mono"
+                />
+                <input 
+                  type="text"
+                  placeholder="z"
+                  value={plState.z}
+                  onChange={e => setPlState({...plState, z: e.target.value})}
+                  disabled={isSimulating}
+                  className="w-full bg-bg-secondary border border-border-subtle rounded p-2 text-sm text-text-main outline-none focus:border-accent-main font-mono"
+                />
+              </div>
+            </section>
+
+            <section>
+              <label className="text-xs font-bold uppercase tracking-widest text-text-muted block mb-3">Pump (i)</label>
+              <input 
+                type="number"
+                min="0"
+                value={plState.i}
+                onChange={e => setPlState({...plState, i: e.target.value === '' ? '' : (parseInt(e.target.value) ?? 0)})}
+                disabled={isSimulating}
+                className="w-full bg-bg-secondary border border-border-subtle rounded p-2 text-sm text-text-main outline-none focus:border-accent-main font-mono"
+              />
+            </section>
+          </motion.div>
         )}
 
         {isAutomatonSource && (

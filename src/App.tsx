@@ -3,10 +3,10 @@ import { Activity, Palette, Play, SquareTerminal, Github, Linkedin, X, Mail, Log
 import { motion, AnimatePresence } from 'motion/react';
 import { Sidebar } from './components/Sidebar';
 import { MainArea } from './components/MainArea';
-import { Automata, Transition, ConversionStep } from './types';
+import { Automata, Transition, ConversionStep, PumpingLemmaState } from './types';
 import { auth, signInWithGoogle, logout, completeRedirectSignIn } from './lib/firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
-import { convertNfaToDfa, convertRegexToEnfa, convertGrammarToFa, convertAutomataToRegex, convertLangToFa, convertLangIntersection, checkFaEquivalence } from './lib/automata';
+import { convertNfaToDfa, convertRegexToEnfa, convertGrammarToFa, convertAutomataToRegex, convertLangToFa, convertLangIntersection, checkFaEquivalence, minimizeDfa, simulatePumpingLemma } from './lib/automata';
 
 export default function App() {
   const [theme, setTheme] = useState('theme-gp');
@@ -21,6 +21,17 @@ export default function App() {
   const [langString, setLangString] = useState('ab');
   const [langCount, setLangCount] = useState(1);
   const [langOutputType, setLangOutputType] = useState<'DFA' | 'NFA'>('DFA');
+  
+  const [plState, setPlState] = useState<PumpingLemmaState>({
+    language: '0n1n',
+    p: 0,
+    w: '0000011111',
+    x: 'ε',
+    y: '0',
+    z: '000011111',
+    i: 2
+  });
+
   const [intersectionConditions, setIntersectionConditions] = useState<{cond: string, str: string, count?: number}[]>([
     { cond: 'starts_with', str: 'ab' },
     { cond: 'ends_with', str: 'ba' }
@@ -146,6 +157,10 @@ export default function App() {
 
      } else if (transformation === 'LANG_INTERSECTION') {
          const steps = convertLangIntersection(intersectionConditions, langOutputType === 'NFA');
+         setSimulationSteps(steps);
+         setCurrentStepIndex(0);
+     } else if (transformation === 'DFA_MINIMIZATION') {
+         const steps = minimizeDfa(automata);
          setSimulationSteps(steps);
          setCurrentStepIndex(0);
      } else if (transformation === 'FA_EQUIVALENCE') {
@@ -310,6 +325,7 @@ export default function App() {
            langCount={langCount} setLangCount={setLangCount}
            intersectionConditions={intersectionConditions} setIntersectionConditions={setIntersectionConditions}
            langOutputType={langOutputType} setLangOutputType={setLangOutputType}
+           plState={plState} setPlState={setPlState}
         />
         <MainArea 
            transformation={transformation}
@@ -318,6 +334,7 @@ export default function App() {
            currentStepIndex={currentStepIndex}
            setCurrentStepIndex={setCurrentStepIndex}
            onReset={() => setSimulationSteps([])}
+           plState={plState}
         />
       </div>
 

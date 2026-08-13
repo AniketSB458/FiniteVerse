@@ -1,5 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { GraphCanvas } from './GraphCanvas';
+import { PumpingLemmaProof } from './PumpingLemmaProof';
+import { PumpingLemmaState } from '../types';
 import { Automata, ConversionStep } from '../types';
 import { ChevronLeft, ChevronRight, RotateCcw, Play, Pause } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -11,6 +13,7 @@ type MainAreaProps = {
   currentStepIndex: number;
   setCurrentStepIndex: (v: number) => void;
   onReset: () => void;
+  plState?: PumpingLemmaState;
 };
 
 export function MainArea({
@@ -19,9 +22,13 @@ export function MainArea({
   simulationSteps,
   currentStepIndex,
   setCurrentStepIndex,
-  onReset
+  onReset,
+  plState
 }: MainAreaProps) {
   const [isPlaying, setIsPlaying] = useState(false);
+
+
+
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
 
   useEffect(() => {
@@ -36,6 +43,14 @@ export function MainArea({
     
     return () => clearInterval(intervalId);
   }, [isPlaying, currentStepIndex, simulationSteps.length, playbackSpeed, setCurrentStepIndex]);
+
+  if (transformation === 'PUMPING_LEMMA' && plState) {
+    return (
+      <main className="flex-1 relative bg-[radial-gradient(var(--border-subtle)_1px,transparent_1px)] bg-[size:32px_32px] overflow-y-auto flex flex-col">
+        <PumpingLemmaProof plState={plState} isSimulating={simulationSteps.length > 0} />
+      </main>
+    );
+  }
 
   const isConverting = simulationSteps.length > 0;
   const isTextSource = ['REGEX_TO_ENFA', 'REGEX_TO_DFA', 'RG_TO_FA', 'CFG_TO_PDA', 'LANG_TO_FA', 'LANG_INTERSECTION'].includes(transformation);

@@ -26,3 +26,13 @@ export type ConversionStep = {
   dfaAcceptStates?: string[][];
   dfaStartState?: string[];
 };
+
+export type PumpingLemmaState = {
+  language: string;
+  p: number | '';
+  w: string;
+  x: string;
+  y: string;
+  z: string;
+  i: number | '';
+};

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Activity, Palette, Play, SquareTerminal, Github, Linkedin, X, Mail, LogOut, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Sidebar } from './components/Sidebar';
+import { PandaBot } from './components/PandaBot';
 import { MainArea } from './components/MainArea';
 import { Automata, Transition, ConversionStep, PumpingLemmaState } from './types';
 import { auth, signInWithGoogle, logout, completeRedirectSignIn } from './lib/firebase';
@@ -426,6 +427,7 @@ export default function App() {
           </div>
         )}
       </AnimatePresence>
+      <PandaBot transformation={transformation} isSimulating={simulationSteps.length > 0 && currentStepIndex < simulationSteps.length - 1} />
     </div>
   );
 }
